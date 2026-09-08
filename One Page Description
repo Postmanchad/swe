@@ -1,10 +1,29 @@
 
-The software application I would like to create is a scheduling and productivity app designed for everyday people and students. The purpose of the application is to help users organize their schedules, manage responsibilities, set goals, and stay productive all in one convenient location. Instead of requiring users to use multiple applications for their calendar, tasks, goals, and notes, this application would combine these functions into one easy-to-use platform.
+Simplroutine
 
-One of the main features of the application would be a calendar system. Users would be able to view their schedules through monthly, weekly, and daily calendars. The monthly calendar would provide a big-picture view of important events, holidays, appointments, and deadlines. A weekly view would allow users to organize their upcoming responsibilities, while the daily planner could include hourly time-blocking for users with busy schedules. The application could also include a yearly overview where users can record important dates, birthdays, vacations, and long-term deadlines.
 
-Another important feature would be a goal-setting section. Users could create short-term and long-term goals and break larger goals into smaller, manageable tasks. The app could allow users to track their progress and set monthly intentions or motivational reminders. This would be especially useful for students who want to set academic goals, such as completing assignments, preparing for exams, or maintaining a certain grade.
+The software application I would like to create is a scheduling and productivity app designed for everyday people and students. The main purpose of the application is to help users organize their schedules, manage responsibilities, set goals, and stay productive all in one convenient location. Instead of requiring users to switch between multiple applications for their calendar, tasks, goals, and notes, this application combines these core productivity functions into one cohesive, easy-to-use platform.
 
-The application would also include task and priority management. Users could create to-do lists and separate tasks based on their level of importance. For example, high-priority assignments or appointments could be placed in a priority section, while less urgent tasks could remain on a general task list. A notes section could also allow users to write down ideas, reminders, lists, or other information that does not necessarily belong on their calendar.
 
-Finally, the application would focus on usability and personalization. Users could customize their calendars, organize information by category, and receive reminders for upcoming events and deadlines. The overall goal of the application would be to create a simple but comprehensive digital planner that helps users manage their time, stay organized, and accomplish their goals. By combining calendars, daily planning, goal setting, task management, and notes into one application, the software could serve as an all-in-one productivity tool for both students and everyday users.
+Functionality & Features  
+
+Flexible Calendar System & Custom Event Details: Users can view their schedules through monthly, weekly, daily, and yearly views. The monthly calendar provides a big-picture view of major events, appointments, and deadlines, while the daily view includes hourly time-blocking for detailed planning. Users can set recurring tasks and events on specific days of the week (e.g., classes running every Monday and Wednesday). Clicking on any scheduled task or appointment opens an inline notes section where users can add specific details, reminders, or agendas directly associated with that entry.
+
+Dedicated Homework & Academic Tracker: Designed specifically with students in mind, a dedicated homework section allows users to input their courses and manage individual assignments. Each assignment can be customized with a due date, specific submission time, urgency indicator (high/medium/low priority), course tag, and additional project notes.
+
+Goal Setting & Task Management: Users can create short-term and long-term goals, breaking them down into actionable steps. Progress bars, monthly intentions, and motivational reminders help keep users on track. The task management module allows users to filter and sort general to-do items by priority, category, or status.
+
+Usability & Personalization: A built-in notes module captures general thoughts, lists, and reference materials. Users can personalize their planner with custom categories, color-coded tags, and configurable reminders for upcoming deadlines.
+
+
+Framework, UI & Technology Stack Architecture
+
+To ensure the application is accessible across both desktop computers and mobile devices with appropriate view constraints, the software will be built using a modern full-stack web architecture containerized with Docker:
+
+Frontend UI (React.js + Tailwind CSS): The user interface will be built using React, providing a responsive, single-page application (SPA) experience. The layout will dynamically adapt between desktop monitors and mobile browser screens. CSS media queries and responsive components will allow the desktop version to show full multi-column planning dashboards, while the mobile view offers a streamlined view focused on quick task entry and daily schedules.
+
+Backend Framework (Python FastAPI or Node.js Express): The backend API handles calendar logic, recurring event generation, user authentication, and task management. It enforces Role-Based Access Control (RBAC) to manage feature visibility and permission constraints across different devices and user roles.
+
+Database (PostgreSQL): A relational database will store structured user data, including user accounts, courses, recurring schedule patterns, task lists, and notes linked to specific appointments.
+
+Containerization (Docker & Docker Compose): The entire application ecosystem—frontend UI, backend API, and database—will be packaged into isolated Docker containers. Using Docker ensures consistent runtime environments across development machines, simplifies local testing, and streamlines final deployment.

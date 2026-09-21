@@ -1,6 +1,6 @@
 # Requirements Document: Simplroutine
 
--- 1. Customer Statement of Requirements
+## 1. Customer Statement of Requirements
 Simplroutine is a scheduling and productivity app designed for everyday people and students. The main purpose is to help users organize their schedules, manage responsibilities, set goals, and stay productive in one convenient location without needing to switch between multiple applications.
 
 

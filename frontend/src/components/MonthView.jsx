@@ -1,6 +1,10 @@
 import { WEEKDAY_SHORT, describeDate, getMonthGrid, isSameDay, isSameMonth } from '../utils/calendar';
+import { getEventsForDay } from '../utils/events';
+import EventChip from './EventChip';
 
-export default function MonthView({ date, today, onSelectDay }) {
+const MAX_CHIPS = 3;
+
+export default function MonthView({ date, today, events, onSelectDay, onCreate, onOpenEvent }) {
   const grid = getMonthGrid(date);
 
   return (
@@ -17,29 +21,47 @@ export default function MonthView({ date, today, onSelectDay }) {
         {grid.map((day) => {
           const inMonth = isSameMonth(day, date);
           const isToday = isSameDay(day, today);
+          const dayEvents = getEventsForDay(events, day);
+          const hidden = dayEvents.length - MAX_CHIPS;
           return (
-            <button
+            // Clicking empty space in a cell starts a new event on that day.
+            <div
               key={day.toISOString()}
-              type="button"
-              onClick={() => onSelectDay(day)}
-              aria-label={describeDate(day)}
-              aria-current={isToday ? 'date' : undefined}
-              className={`flex flex-col items-start border-b border-r border-line p-2 text-left hover:bg-accent-soft ${
+              onClick={(e) => {
+                if (e.target === e.currentTarget) onCreate(new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0));
+              }}
+              className={`flex min-h-0 flex-col gap-0.5 overflow-hidden border-b border-r border-line p-1.5 ${
                 inMonth ? 'bg-surface' : 'bg-canvas/60'
               }`}
             >
-              <span
-                className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1 text-sm ${
+              <button
+                type="button"
+                onClick={() => onSelectDay(day)}
+                aria-label={describeDate(day)}
+                aria-current={isToday ? 'date' : undefined}
+                className={`mb-0.5 flex h-7 min-w-7 shrink-0 items-center justify-center self-start rounded-full px-1 text-sm hover:bg-accent-soft ${
                   isToday
-                    ? 'bg-accent font-semibold text-white'
+                    ? 'bg-accent font-semibold text-white hover:bg-accent'
                     : inMonth
                       ? 'font-medium text-ink'
                       : 'text-muted/60'
                 }`}
               >
                 {day.getDate()}
-              </span>
-            </button>
+              </button>
+              {dayEvents.slice(0, MAX_CHIPS).map((e) => (
+                <EventChip key={`${e.id}-${e.start.getTime()}`} event={e} onOpen={onOpenEvent} />
+              ))}
+              {hidden > 0 && (
+                <button
+                  type="button"
+                  onClick={() => onSelectDay(day)}
+                  className="self-start rounded px-1 text-xs text-muted hover:text-ink"
+                >
+                  +{hidden} more
+                </button>
+              )}
+            </div>
           );
         })}
       </div>

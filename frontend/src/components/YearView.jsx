@@ -7,8 +7,9 @@ import {
   isSameDay,
   isSameMonth,
 } from '../utils/calendar';
+import { toDateInput } from '../utils/events';
 
-function MiniMonth({ month, today, onSelectMonth, onSelectDay }) {
+function MiniMonth({ month, today, eventKeys, onSelectMonth, onSelectDay }) {
   const grid = getMonthGrid(month);
   const isCurrentMonth = isSameMonth(month, today);
 
@@ -35,18 +36,25 @@ function MiniMonth({ month, today, onSelectMonth, onSelectDay }) {
             return <span key={day.toISOString()} aria-hidden="true" />;
           }
           const isToday = isSameDay(day, today);
+          const hasEvents = eventKeys.has(toDateInput(day));
           return (
             <button
               key={day.toISOString()}
               type="button"
               onClick={() => onSelectDay(day)}
-              aria-label={describeDate(day)}
+              aria-label={`${describeDate(day)}${hasEvents ? ', has events' : ''}`}
               aria-current={isToday ? 'date' : undefined}
-              className={`mx-auto flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+              className={`relative mx-auto flex h-7 w-7 items-center justify-center rounded-full text-xs ${
                 isToday ? 'bg-accent font-semibold text-white' : 'text-ink hover:bg-accent-soft'
               }`}
             >
               {day.getDate()}
+              {hasEvents && (
+                <span
+                  className={`absolute bottom-0.5 h-1 w-1 rounded-full ${isToday ? 'bg-white' : 'bg-accent'}`}
+                  aria-hidden="true"
+                />
+              )}
             </button>
           );
         })}
@@ -55,14 +63,15 @@ function MiniMonth({ month, today, onSelectMonth, onSelectDay }) {
   );
 }
 
-export default function YearView({ date, today, onSelectMonth, onSelectDay }) {
+export default function YearView({ date, today, eventKeys, onSelectMonth, onSelectDay }) {
   return (
-    <div className="grid grid-cols-1 gap-4 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid h-full grid-cols-1 content-start gap-4 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {getYearMonths(date.getFullYear()).map((month) => (
         <MiniMonth
           key={month.getMonth()}
           month={month}
           today={today}
+          eventKeys={eventKeys}
           onSelectMonth={onSelectMonth}
           onSelectDay={onSelectDay}
         />

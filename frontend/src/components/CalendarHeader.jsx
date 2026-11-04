@@ -5,7 +5,7 @@ const LABELS = { day: 'Day', week: 'Week', month: 'Month', year: 'Year' };
 const navButton =
   'h-9 rounded-md border border-line bg-surface px-3 text-sm font-medium text-ink hover:bg-accent-soft';
 
-export default function CalendarHeader({ view, date, onViewChange, onPrev, onNext, onToday }) {
+export default function CalendarHeader({ view, date, onViewChange, onPrev, onNext, onToday, onNewEvent }) {
   return (
     <header className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
       <div className="flex items-center gap-2">
@@ -23,6 +23,14 @@ export default function CalendarHeader({ view, date, onViewChange, onPrev, onNex
       <h1 className="min-w-0 flex-1 text-xl font-semibold tracking-tight sm:text-2xl" aria-live="polite">
         {getTitle(view, date)}
       </h1>
+
+      <button
+        type="button"
+        onClick={onNewEvent}
+        className="h-9 rounded-md bg-accent px-3 text-sm font-medium text-white hover:brightness-110"
+      >
+        + New event
+      </button>
 
       <div role="group" aria-label="Calendar view" className="flex rounded-md border border-line bg-surface p-0.5">
         {VIEWS.map((v) => (

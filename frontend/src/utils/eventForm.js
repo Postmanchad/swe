@@ -4,7 +4,7 @@
 import { addDays } from './calendar';
 import { DEFAULT_COLOR, toDateInput, toTimeInput } from './events';
 
-function parseLocalDate(str) {
+export function parseLocalDate(str) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str ?? '');
   if (!m) return null;
   const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
@@ -12,7 +12,7 @@ function parseLocalDate(str) {
   return date.getFullYear() === y && date.getMonth() === mo - 1 && date.getDate() === d ? date : null;
 }
 
-function combineLocal(dateStr, timeStr) {
+export function combineLocal(dateStr, timeStr) {
   const day = parseLocalDate(dateStr);
   const m = /^(\d{2}):(\d{2})$/.exec(timeStr ?? '');
   if (!day || !m) return null;

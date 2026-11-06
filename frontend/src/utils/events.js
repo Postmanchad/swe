@@ -15,6 +15,7 @@ export const EVENT_COLORS = [
 ];
 
 const pad = (n) => String(n).padStart(2, '0');
+const DUE_BLOCK_MINUTES = 30; // an assignment's due time is drawn as a short block ending at that time
 
 // The date range each view needs to fetch: { from, to } with `to` exclusive.
 // Every range stays under the backend's 400-day limit.
@@ -42,12 +43,19 @@ export function getEventsForDay(events, day) {
   const dayStart = startOfDay(day);
   const dayEnd = addDays(dayStart, 1);
   return events
-    .filter((e) => e.start < dayEnd && e.end > dayStart)
+    .filter((e) =>
+      // An assignment is due at one moment, so it belongs to the day that moment falls on.
+      e.kind === 'assignment' ? e.start >= dayStart && e.start < dayEnd : e.start < dayEnd && e.end > dayStart,
+    )
     .sort((a, b) => Number(b.all_day) - Number(a.all_day) || a.start - b.start);
 }
 
 // Minutes since local midnight where the event starts and ends on this day (clipped to the day).
 export function getDaySegment(event, day) {
+  if (event.kind === 'assignment') {
+    const dueMin = event.start.getHours() * 60 + event.start.getMinutes();
+    return { startMin: Math.max(0, dueMin - DUE_BLOCK_MINUTES), endMin: Math.max(dueMin, DUE_BLOCK_MINUTES) };
+  }
   const dayStart = startOfDay(day);
   const dayEnd = addDays(dayStart, 1);
   const s = event.start < dayStart ? dayStart : event.start;
@@ -103,6 +111,10 @@ export function toTimeInput(d) {
 export function eventDayKeys(events) {
   const keys = new Set();
   for (const e of events) {
+    if (e.kind === 'assignment') {
+      keys.add(toDateInput(e.start));
+      continue;
+    }
     for (let d = startOfDay(e.start); d < e.end; d = addDays(d, 1)) keys.add(toDateInput(d));
   }
   return keys;

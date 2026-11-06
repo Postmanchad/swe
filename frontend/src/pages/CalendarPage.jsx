@@ -1,21 +1,32 @@
 import { useMemo, useState } from 'react';
+import AssignmentModal from '../components/AssignmentModal';
 import CalendarHeader from '../components/CalendarHeader';
 import EventModal from '../components/EventModal';
 import MonthView from '../components/MonthView';
 import TimeGrid from '../components/TimeGrid';
 import YearView from '../components/YearView';
 import useEvents from '../hooks/useEvents';
+import { useAssignments, useCourses } from '../hooks/useAcademics';
 import { getWeekDays, shiftDate, startOfDay } from '../utils/calendar';
-import { eventDayKeys } from '../utils/events';
+import { assignmentToItem } from '../utils/dueItems';
+import { eventDayKeys, getVisibleRange } from '../utils/events';
 
 export default function CalendarPage() {
   const [view, setView] = useState('month');
   const [date, setDate] = useState(() => startOfDay(new Date()));
   const [target, setTarget] = useState(null); // null, { mode: 'create', start } or { mode: 'edit', id }
+  const [dueTarget, setDueTarget] = useState(null); // an assignment being edited, or null
   const today = startOfDay(new Date());
 
-  const { events, error, reload } = useEvents(view, date);
-  const eventKeys = useMemo(() => eventDayKeys(events), [events]);
+  const events = useEvents(view, date);
+  const { from, to } = getVisibleRange(view, date);
+  const due = useAssignments({ due_from: from, due_to: to, sort: 'due', limit: 500 });
+  const courses = useCourses();
+
+  // Events and assignment due dates are drawn together by the same views.
+  const items = useMemo(() => [...events.events, ...due.items.map(assignmentToItem)], [events.events, due.items]);
+  const eventKeys = useMemo(() => eventDayKeys(items), [items]);
+  const error = events.error || due.error;
 
   const openDay = (day) => {
     setDate(day);
@@ -26,11 +37,17 @@ export default function CalendarPage() {
     setView('month');
   };
   const createAt = (start) => setTarget({ mode: 'create', start });
-  const edit = (event) => setTarget({ mode: 'edit', id: event.id });
-  const closeModal = () => setTarget(null);
+  const openItem = (item) => {
+    if (item.kind === 'assignment') setDueTarget(item.assignment);
+    else setTarget({ mode: 'edit', id: item.id });
+  };
   const saved = () => {
     setTarget(null);
-    reload();
+    events.reload();
+  };
+  const dueSaved = () => {
+    setDueTarget(null);
+    due.reload();
   };
 
   return (
@@ -51,7 +68,14 @@ export default function CalendarPage() {
           className="mx-4 mb-3 flex items-center gap-3 rounded-md border border-now/40 bg-now/10 px-3 py-2 text-sm sm:mx-6"
         >
           <span className="flex-1">{error}</span>
-          <button type="button" onClick={reload} className="font-medium text-accent hover:underline">
+          <button
+            type="button"
+            onClick={() => {
+              events.reload();
+              due.reload();
+            }}
+            className="font-medium text-accent hover:underline"
+          >
             Retry
           </button>
         </div>
@@ -62,24 +86,24 @@ export default function CalendarPage() {
           <MonthView
             date={date}
             today={today}
-            events={events}
+            events={items}
             onSelectDay={openDay}
             onCreate={createAt}
-            onOpenEvent={edit}
+            onOpenEvent={openItem}
           />
         )}
         {view === 'week' && (
           <TimeGrid
             days={getWeekDays(date)}
             today={today}
-            events={events}
+            events={items}
             onSelectDay={openDay}
             onCreate={createAt}
-            onOpenEvent={edit}
+            onOpenEvent={openItem}
           />
         )}
         {view === 'day' && (
-          <TimeGrid days={[date]} today={today} events={events} onCreate={createAt} onOpenEvent={edit} />
+          <TimeGrid days={[date]} today={today} events={items} onCreate={createAt} onOpenEvent={openItem} />
         )}
         {view === 'year' && (
           <YearView date={date} today={today} eventKeys={eventKeys} onSelectMonth={openMonth} onSelectDay={openDay} />
@@ -90,8 +114,19 @@ export default function CalendarPage() {
         <EventModal
           key={target.mode === 'edit' ? `edit-${target.id}` : `new-${target.start.getTime()}`}
           target={target}
-          onClose={closeModal}
+          onClose={() => setTarget(null)}
           onSaved={saved}
+        />
+      )}
+
+      {/* Wait for the course list so the course dropdown is filled in. */}
+      {dueTarget && !courses.loading && (
+        <AssignmentModal
+          key={dueTarget.id}
+          assignment={dueTarget}
+          courses={courses.items}
+          onClose={() => setDueTarget(null)}
+          onSaved={dueSaved}
         />
       )}
     </div>

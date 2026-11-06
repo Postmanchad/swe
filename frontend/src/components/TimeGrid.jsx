@@ -120,6 +120,8 @@ export default function TimeGrid({ days, today, events, onSelectDay, onCreate, o
                   const { startMin, endMin } = segments[i];
                   const { col, cols } = layout[i];
                   const color = event.color || DEFAULT_COLOR;
+                  const isDue = event.kind === 'assignment';
+                  const edge = event.overdue ? '#b4233f' : color;
                   const height = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, (MIN_VISUAL_MINUTES / 60) * HOUR_HEIGHT) - 2;
                   return (
                     <button
@@ -129,25 +131,41 @@ export default function TimeGrid({ days, today, events, onSelectDay, onCreate, o
                         e.stopPropagation();
                         onOpenEvent(event);
                       }}
-                      title={`${event.title}, ${formatClock(event.start)} – ${formatClock(event.end)}`}
+                      title={
+                        isDue
+                          ? `Due ${formatClock(event.start)}: ${event.title} (${event.courseName})`
+                          : `${event.title}, ${formatClock(event.start)} – ${formatClock(event.end)}`
+                      }
                       className="absolute z-[5] cursor-pointer overflow-hidden rounded px-1.5 py-0.5 text-left text-xs leading-tight hover:brightness-95"
                       style={{
                         top: (startMin / 60) * HOUR_HEIGHT + 1,
                         height,
                         left: `calc(${(col / cols) * 100}% + 1px)`,
                         width: `calc(${100 / cols}% - 3px)`,
-                        backgroundColor: `${color}26`,
-                        borderLeft: `3px solid ${color}`,
+                        ...(isDue
+                          ? { backgroundColor: 'var(--color-surface)', border: `1.5px solid ${edge}` }
+                          : { backgroundColor: `${color}26`, borderLeft: `3px solid ${color}` }),
                         color: 'var(--color-ink)',
                       }}
                     >
-                      <span className="block truncate font-medium">
-                        {event.recurring && <span aria-label="repeats">↻ </span>}
-                        {event.title}
-                      </span>
-                      <span className="block truncate text-muted">
-                        {formatClock(event.start)} – {formatClock(event.end)}
-                      </span>
+                      {isDue ? (
+                        <span
+                          className={`block truncate font-medium ${event.done ? 'line-through opacity-60' : ''}`}
+                          style={{ color: event.overdue ? '#b4233f' : undefined }}
+                        >
+                          {event.done ? '✓ ' : ''}Due {formatClock(event.start)} · {event.title}
+                        </span>
+                      ) : (
+                        <>
+                          <span className="block truncate font-medium">
+                            {event.recurring && <span aria-label="repeats">↻ </span>}
+                            {event.title}
+                          </span>
+                          <span className="block truncate text-muted">
+                            {formatClock(event.start)} – {formatClock(event.end)}
+                          </span>
+                        </>
+                      )}
                     </button>
                   );
                 })}
